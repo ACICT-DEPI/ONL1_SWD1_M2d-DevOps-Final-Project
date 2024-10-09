@@ -1,11 +1,11 @@
 pipeline {
     agent any
 
-    environment {
+    // environment {
         
         // DOCKER_IMAGE = "your-dockerhub-username/devops-project:${env.BUILD_NUMBER}"
       // REGISTRY_CREDENTIALS = 'dockerhub-credentials-id' // Replace with your Docker Hub credentials ID in Jenkins
-    }
+    // }
 
     stages {
 
@@ -52,17 +52,17 @@ pipeline {
             }
         }
 
-        stage('Docker Push') {
-            steps {
-                script {
-                    // Login to Docker Hub
-                  //  docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials-id') {
-                        // Push the Docker image
-                     //   docker.image("${DOCKER_IMAGE}").push()
-                    }
-                }
-            }
-        }
+        // stage('Docker Push') {
+        //     steps {
+        //         script {
+        //             // Login to Docker Hub
+        //           //  docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials-id') {
+        //                 // Push the Docker image
+        //              //   docker.image("${DOCKER_IMAGE}").push()
+        //             }
+        //         }
+        //     }
+         }
 
        
     
