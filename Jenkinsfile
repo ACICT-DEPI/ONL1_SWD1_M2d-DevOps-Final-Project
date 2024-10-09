@@ -1,36 +1,45 @@
 pipeline {
     agent any
 
-    // environment {
-        
-        // DOCKER_IMAGE = "your-dockerhub-username/devops-project:${env.BUILD_NUMBER}"
-      // REGISTRY_CREDENTIALS = 'dockerhub-credentials-id' // Replace with your Docker Hub credentials ID in Jenkins
-    // }
+  //  environment {
+    //    DOCKER_IMAGE = "your-dockerhub-username/devops-project:${env.BUILD_NUMBER}"
+     //   REGISTRY_CREDENTIALS = 'dockerhub-credentials-id' // Replace with your Docker Hub credentials ID in Jenkins
+   // }
 
     stages {
-
         stage('Docker Build') {
             steps {
-                    sh "docker build Docker/. -t react-app:${env.BUILD_NUMBER}"
-                    sh "docker run -d -p 3000:80 react-app:${env.BUILD_NUMBER}"
-                
+                sh "docker build Docker/. -t react-app:${env.BUILD_NUMBER}"
             }
         }
 
+        stage('Test') {
+            steps {
+                script {
+                    docker.image("react-app:${env.BUILD_NUMBER}").inside {
+                        sh 'yarn test'
+                    }
+                }
+            }
+        }
+
+        stage('Docker deploy') {
+            steps {
+                sh "docker run -d -p 3000:80 react-app:${env.BUILD_NUMBER}"
+            }
+        }
+
+        // Uncomment and configure the Docker Push stage if needed
         // stage('Docker Push') {
         //     steps {
         //         script {
-        //             // Login to Docker Hub
-        //           //  docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials-id') {
-        //                 // Push the Docker image
-        //              //   docker.image("${DOCKER_IMAGE}").push()
+        //             docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials-id') {
+        //                 docker.image("${DOCKER_IMAGE}").push()
         //             }
         //         }
         //     }
-         }
-
-       
-    
+        // }
+    }
 
     post {
         success {
