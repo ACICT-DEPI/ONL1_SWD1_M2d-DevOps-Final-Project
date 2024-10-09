@@ -46,7 +46,7 @@ pipeline {
         stage('Docker Build') {
             steps {
                     sh "docker build Docker/. -t react-app:${env.BUILD_NUMBER}"
-                }
+                
             }
         }
 
