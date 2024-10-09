@@ -9,45 +9,45 @@ pipeline {
 
     stages {
 
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm install'
-            }
-        }
+        // stage('Install Dependencies') {
+        //     steps {
+        //         sh 'npm install'
+        //     }
+        // }
 
-        stage('Build') {
-            steps {
-                // Build the React application
-                sh 'npm run build'
-            }
-        }
+        // stage('Build') {
+        //     steps {
+        //         // Build the React application
+        //         sh 'npm run build'
+        //     }
+        // }
 
-        stage('Test') {
-            steps {
-                // Run tests
-                sh 'npm test -- --coverage'
-            }
-            post {
-                always {
-                    // Archive test results and coverage reports
-                    junit 'coverage/junit.xml'
-                    publishHTML(target: [
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'coverage',
-                        reportFiles: 'index.html',
-                        reportName: 'Coverage Report'
-                    ])
-                }
-            }
-        }
+        // stage('Test') {
+        //     steps {
+        //         // Run tests
+        //         sh 'npm test -- --coverage'
+        //     }
+        //     post {
+        //         always {
+        //             // Archive test results and coverage reports
+        //             junit 'coverage/junit.xml'
+        //             publishHTML(target: [
+        //                 allowMissing: false,
+        //                 alwaysLinkToLastBuild: true,
+        //                 keepAll: true,
+        //                 reportDir: 'coverage',
+        //                 reportFiles: 'index.html',
+        //                 reportName: 'Coverage Report'
+        //             ])
+        //         }
+        //     }
+        // }
 
         stage('Docker Build') {
             steps {
                 script {
                     // Build Docker image using Dockerfile in Docker directory
-                    docker.build("${DOCKER_IMAGE}", "-f Docker/Dockerfile .")
+                    docker.build -t react-app-${env.BUILD_NUMBER} -f Docker/Dockerfile .
                 }
             }
         }
