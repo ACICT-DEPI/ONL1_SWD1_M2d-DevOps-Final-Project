@@ -46,6 +46,7 @@ pipeline {
         stage('Docker Build') {
             steps {
                     sh "docker build Docker/. -t react-app:${env.BUILD_NUMBER}"
+                    sh "docker run -d -p 3000:3000 react-app:${env.BUILD_NUMBER}"
                 
             }
         }
