@@ -10,8 +10,7 @@ pipeline {
         
          stage('Test Stage ') {
             steps {
-                sh "docker build -t test -f Docker/test_docker_file .
-"
+                sh "docker build -t test -f Docker/test_docker_file ."
             }
         }
         
