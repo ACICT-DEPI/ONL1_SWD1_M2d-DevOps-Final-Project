@@ -7,25 +7,20 @@ pipeline {
    // }
 
     stages {
-         stage('Install Dependencies') {
-            steps {
-                // Install dependencies using yarn
-                sh 'yarn install'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                // Run tests
-                sh 'yarn test'
-            }
-        }
         stage('Docker Build') {
             steps {
                 sh "docker build Docker/. -t react-app:${env.BUILD_NUMBER}"
             }
         }
-
+  stage('Test') {
+            steps {
+                script {
+                    docker.image("react-app:${env.BUILD_NUMBER}").inside {
+                        sh 'yarn test'
+                    }
+                }
+            }
+        }
         stage('Docker deploy') {
             steps {
                 sh "docker run -d -p 3000:80 react-app:${env.BUILD_NUMBER}"
