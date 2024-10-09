@@ -9,40 +9,6 @@ pipeline {
 
     stages {
 
-        // stage('Install Dependencies') {
-        //     steps {
-        //         sh 'npm install'
-        //     }
-        // }
-
-        // stage('Build') {
-        //     steps {
-        //         // Build the React application
-        //         sh 'npm run build'
-        //     }
-        // }
-
-        // stage('Test') {
-        //     steps {
-        //         // Run tests
-        //         sh 'npm test -- --coverage'
-        //     }
-        //     post {
-        //         always {
-        //             // Archive test results and coverage reports
-        //             junit 'coverage/junit.xml'
-        //             publishHTML(target: [
-        //                 allowMissing: false,
-        //                 alwaysLinkToLastBuild: true,
-        //                 keepAll: true,
-        //                 reportDir: 'coverage',
-        //                 reportFiles: 'index.html',
-        //                 reportName: 'Coverage Report'
-        //             ])
-        //         }
-        //     }
-        // }
-
         stage('Docker Build') {
             steps {
                     sh "docker build Docker/. -t react-app:${env.BUILD_NUMBER}"
