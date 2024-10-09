@@ -47,7 +47,7 @@ pipeline {
             steps {
                 script {
                     // Build Docker image using Dockerfile in Docker directory
-                    docker.build("my-react-app:${env.BUILD_NUMBER} -f Docker/dockerfile")
+                    docker.build("my-react-app:${env.BUILD_NUMBER} -f Docker/")
                 }
             }
         }
