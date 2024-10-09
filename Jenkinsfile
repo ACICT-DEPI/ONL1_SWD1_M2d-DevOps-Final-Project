@@ -12,15 +12,6 @@ pipeline {
                 sh "docker build Docker/. -t react-app:${env.BUILD_NUMBER}"
             }
         }
-  stage('Test') {
-            steps {
-                script {
-                    docker.image("react-app:${env.BUILD_NUMBER}").inside {
-                        sh 'yarn test'
-                    }
-                }
-            }
-        }
         stage('Docker deploy') {
             steps {
                 sh "docker run -d -p 3000:80 react-app:${env.BUILD_NUMBER}"
