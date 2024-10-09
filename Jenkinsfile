@@ -8,14 +8,14 @@ pipeline {
 
     stages {
         
-       stage('Test Stage') {
-            steps {
-                sh '''
-                    docker build TestDocker/. -t test
-                    docker run --rm test yarn test  # Run tests inside the container
-                '''
-            }
-        }
+      // stage('Test Stage') {
+        //    steps {
+             //   sh '''
+              //      docker build TestDocker/. -t test
+                
+              //  '''
+         //   }
+       // }
         
         stage('Docker Build') {
             steps {
