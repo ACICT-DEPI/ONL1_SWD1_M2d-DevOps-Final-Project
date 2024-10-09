@@ -8,11 +8,11 @@ pipeline {
 
     stages {
         
-        // stage('Test Stage ') {
-           // steps {
-            //    sh "docker build -t test  -f Docker/test_dockerfile ."
-          //  }
-      //  }
+         stage('Test Stage ') {
+            steps {
+                sh "docker build -t test  -f Docker/test_dockerfile ."
+            }
+        }
         
         stage('Docker Build') {
             steps {
