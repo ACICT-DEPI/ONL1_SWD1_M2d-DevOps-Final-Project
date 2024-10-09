@@ -7,6 +7,13 @@ pipeline {
    // }
 
     stages {
+        
+         stage('Test Stage ') {
+            steps {
+                sh "docker build -f Docker/test_dockerfile ."
+            }
+        }
+        
         stage('Docker Build') {
             steps {
                 sh "docker build Docker/. -t react-app:${env.BUILD_NUMBER}"
