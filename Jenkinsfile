@@ -8,14 +8,14 @@ pipeline {
 
     stages {
         
-      // stage('Test Stage') {
-        //    steps {
-             //   sh '''
-              //      docker build TestDocker/. -t test
+       stage('Test Stage') {
+            steps {
+                sh '''
+                    docker build TestDocker/. -t test
                 
-              //  '''
-         //   }
-       // }
+                '''
+            }
+        }
         
         stage('Docker Build') {
             steps {
