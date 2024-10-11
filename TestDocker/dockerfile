@@ -3,9 +3,13 @@ FROM node:18-alpine AS build
 WORKDIR /app
 
 COPY package.json yarn.lock ./
-
 RUN yarn install
 
 COPY . .
 
+# Build the app
+RUN yarn build
+
+# Test the app
+FROM build AS test
 RUN yarn test
