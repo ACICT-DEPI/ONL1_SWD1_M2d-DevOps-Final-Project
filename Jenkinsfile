@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "mohamedesmael/devops_final_project:${env.BUILD_NUMBER}"
+        LATEST_IMAGE = "mohamedesmael/devops_final_project:latest"
         REGISTRY_CREDENTIALS = 'dockerhub-credentials-id' // The ID for Docker Hub credentials in Jenkins
     }
 
@@ -34,12 +35,19 @@ pipeline {
             }
         }
 
+        stage('Docker Tag as Latest') {
+            steps {
+                sh "docker tag ${DOCKER_IMAGE} ${LATEST_IMAGE}"
+            }
+        }
+
         stage('Docker Push') {
             steps {
                 withCredentials([usernamePassword(credentialsId: REGISTRY_CREDENTIALS, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                     sh '''
                         echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
                         docker push ${DOCKER_IMAGE}
+                        docker push ${LATEST_IMAGE}
                     '''
                 }
             }
@@ -47,7 +55,7 @@ pipeline {
 
         stage('Docker Deploy') {
             steps {
-                sh "docker run -d -p 3000:80 ${DOCKER_IMAGE}"
+                sh "docker run -d -p 3000:80 ${LATEST_IMAGE}"
             }
         }
     }
