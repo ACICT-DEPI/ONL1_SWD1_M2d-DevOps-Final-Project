@@ -10,72 +10,51 @@ pipeline {
     }
 
     stages {
-        stage('Check and Free Port 3000') {
+        stage('Preparation') {
             steps {
                 script {
-                    // Check if any container is using port 3000
-                    def containerID = sh(
-                        script: "docker ps --filter 'publish=3000' --format '{{.ID}}'",
-                        returnStdout: true
-                    ).trim()
-
-                    // If a container is found, stop and remove it
-                    if (containerID) {
-                        echo "Stopping container with ID ${containerID} using port 3000"
-                        sh "docker stop ${containerID}"
-                        sh "docker rm ${containerID}"
-                    } else {
-                        echo "No container found using port 3000"
+                    // Check if the Terraform directory exists
+                    if (!fileExists(TERRAFORM_DIR)) {
+                        error "Terraform directory ${TERRAFORM_DIR} does not exist or is not accessible."
                     }
                 }
             }
         }
 
-        stage('Docker Build') {
+        stage('Build Docker Image') {
             steps {
-                // Build the Docker image
-                sh "docker build Docker/. -t ${DOCKER_IMAGE}"
-            }
-        }
-
-        stage('Docker Tag as Latest') {
-            steps {
-                // Tag the image as latest
-                sh "docker tag ${DOCKER_IMAGE} ${LATEST_IMAGE}"
-            }
-        }
-
-        stage('Docker Push') {
-            steps {
-                // Push the images to Docker Hub
-                withCredentials([usernamePassword(credentialsId: REGISTRY_CREDENTIALS, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh '''
-                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-                        docker push ${DOCKER_IMAGE}
-                        docker push ${LATEST_IMAGE}
-                    '''
+                script {
+                    // Build the Docker image
+                    docker.build(DOCKER_IMAGE)
                 }
             }
         }
 
-        stage('Docker Deploy') {
+        stage('Push Docker Image') {
             steps {
-                // Deploy the Docker container
-                sh "docker run -d -p 3000:80 ${LATEST_IMAGE}"
+                script {
+                    // Log in to Docker Hub and push the latest image
+                    docker.withRegistry('https://index.docker.io/v1/', REGISTRY_CREDENTIALS) {
+                        sh "docker tag ${DOCKER_IMAGE} ${LATEST_IMAGE}"
+                        sh "docker push ${LATEST_IMAGE}"
+                    }
+                }
             }
         }
 
         stage('Run Terraform') {
             steps {
-                // Run Terraform commands in the specified local directory
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS, accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                    dir(TERRAFORM_DIR) {
-                        sh '''
-                            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-                            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-                            terraform init
-                            terraform apply -auto-approve
-                        '''
+                script {
+                    // Run Terraform commands in the specified local directory
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS, accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                        dir(TERRAFORM_DIR) {
+                            sh '''
+                                export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+                                export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+                                terraform init
+                                terraform apply -auto-approve
+                            '''
+                        }
                     }
                 }
             }
