@@ -6,7 +6,8 @@ pipeline {
         LATEST_IMAGE = "mohamedesmael/devops_final_project:latest"
         REGISTRY_CREDENTIALS = 'dockerhub-credentials-id' // Docker Hub credentials ID
         AWS_CREDENTIALS = 'aws-credentials-id' // AWS credentials ID from Jenkins
-        TERRAFORM_DIR = 'Devops-Project/terraform' // Replace with actual Terraform directory
+        TERRAFORM_DIR = 'terraform' // Local directory for Terraform files after cloning
+        GIT_REPO = 'https://github.com/AyaOmer/Devops-Project.git' // GitHub repository URL
     }
 
     stages {
@@ -30,7 +31,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Docker Build') {
             steps {
                 // Build the Docker image
@@ -62,6 +63,41 @@ pipeline {
             steps {
                 // Deploy the Docker container
                 sh "docker run -d -p 3000:80 ${LATEST_IMAGE}"
+            }
+        }
+
+        stage('Install Terraform if Not Found') {
+            steps {
+                script {
+                    // Check if Terraform is installed
+                    def terraformInstalled = sh(script: 'which terraform || echo "not found"', returnStdout: true).trim()
+
+                    // Install Terraform if it's not found
+                    if (terraformInstalled == "not found") {
+                        echo "Terraform not found. Installing..."
+                        sh '''
+                            wget https://releases.hashicorp.com/terraform/1.5.2/terraform_1.5.2_linux_amd64.zip
+                            unzip terraform_1.5.2_linux_amd64.zip
+                            sudo mv terraform /usr/local/bin/
+                        '''
+                        echo "Terraform installed successfully."
+                    } else {
+                        echo "Terraform is already installed."
+                    }
+                }
+            }
+        }
+
+        stage('Clone Terraform Directory from GitHub') {
+            steps {
+                // Clone the GitHub repository containing Terraform files
+                sh '''
+                    if [ -d "${TERRAFORM_DIR}" ]; then
+                        rm -rf ${TERRAFORM_DIR}  // Clean up existing directory
+                    fi
+                    git clone ${GIT_REPO}
+                    mv Devops-Project/terraform ${TERRAFORM_DIR} // Move terraform directory to expected location
+                '''
             }
         }
 
