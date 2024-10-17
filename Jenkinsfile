@@ -1,8 +1,13 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = "mohamedesmael/devops_final_project:${env.BUILD_NUMBER}"
+        REGISTRY_CREDENTIALS = 'dockerhub-credentials-id' // The ID for Docker Hub credentials in Jenkins
+    }
+
     stages {
-        stage('Check and free port 3000') {
+        stage('Check and Free Port 3000') {
             steps {
                 script {
                     // Check if any container is using port 3000
@@ -25,26 +30,25 @@ pipeline {
         
         stage('Docker Build') {
             steps {
-                sh "docker build Docker/. -t react-app:${env.BUILD_NUMBER}"
-            }
-        }
-        
-        stage('Docker Deploy') {
-            steps {
-                sh "docker run -d -p 3000:80 react-app:${env.BUILD_NUMBER}"
+                sh "docker build Docker/. -t ${DOCKER_IMAGE}"
             }
         }
 
-        // Uncomment and configure the Docker Push stage if needed
-        // stage('Docker Push') {
-        //     steps {
-        //         script {
-        //             docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials-id') {
-        //                 docker.image("${DOCKER_IMAGE}").push()
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Docker Push') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', "${REGISTRY_CREDENTIALS}") {
+                        docker.image("${DOCKER_IMAGE}").push()
+                    }
+                }
+            }
+        }
+
+        stage('Docker Deploy') {
+            steps {
+                sh "docker run -d -p 3000:80 ${DOCKER_IMAGE}"
+            }
+        }
     }
 
     post {
