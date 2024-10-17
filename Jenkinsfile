@@ -66,35 +66,6 @@ pipeline {
             }
         }
 
-        stage('Install Terraform if Not Found') {
-            steps {
-                script {
-                    // Check if Terraform is installed
-                    def terraformInstalled = sh(script: 'which terraform || echo "not found"', returnStdout: true).trim()
-
-                    // Install Terraform if it's not found
-                    if (terraformInstalled == "not found") {
-                        echo "Terraform not found. Installing..."
-                        sh '''
-                            sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
-                            wget -O- https://apt.releases.hashicorp.com/gpg | \
-                            gpg --dearmor | \
-                            sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
-                            gpg --no-default-keyring --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg --fingerprint
-                            echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] \
-                            https://apt.releases.hashicorp.com $(lsb_release -cs) main" | \
-                            sudo tee /etc/apt/sources.list.d/hashicorp.list
-                            sudo apt update
-                            sudo apt-get install -y terraform
-                        '''
-                        echo "Terraform installed successfully."
-                    } else {
-                        echo "Terraform is already installed."
-                    }
-                }
-            }
-        }
-
         stage('Clone Terraform Directory from GitHub') {
             steps {
                 // Clone the GitHub repository containing Terraform files
