@@ -86,6 +86,8 @@ pipeline {
                             mv Devops-Project/terraform ${TERRAFORM_DIR} # Move terraform directory to expected location
                         else
                             echo "Terraform directory not found in the repository."
+                            echo "Current directory contents:"
+                            ls -la Devops-Project # List contents of the Devops-Project directory
                             exit 1 # Exit the script with an error
                         fi
                     '''
