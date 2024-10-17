@@ -6,7 +6,7 @@ pipeline {
         LATEST_IMAGE = "mohamedesmael/devops_final_project:latest"
         REGISTRY_CREDENTIALS = 'dockerhub-credentials-id' // Docker Hub credentials ID
         AWS_CREDENTIALS = 'aws-credentials-id' // AWS credentials ID from Jenkins
-        TERRAFORM_DIR = 'terraform' // Local directory for Terraform files after cloning
+        TERRAFORM_DIR = '/project/terraform' // Updated local directory for Terraform files
         GIT_REPO = 'https://github.com/AyaOmer/Devops-Project.git' // GitHub repository URL
     }
 
@@ -81,7 +81,13 @@ pipeline {
                             git clone ${GIT_REPO}
                         fi
 
-                        mv Devops-Project/terraform ${TERRAFORM_DIR} // Move terraform directory to expected location
+                        // Ensure the Terraform directory exists before moving
+                        if [ -d "Devops-Project/terraform" ]; then
+                            mv Devops-Project/terraform ${TERRAFORM_DIR} // Move terraform directory to expected location
+                        else
+                            echo "Terraform directory not found in the repository."
+                            exit 1 // Exit the script with an error
+                        fi
                     '''
                 }
             }
