@@ -81,12 +81,12 @@ pipeline {
                             git clone ${GIT_REPO}
                         fi
 
-                        // Ensure the Terraform directory exists before moving
+                        # Ensure the Terraform directory exists before moving
                         if [ -d "Devops-Project/terraform" ]; then
-                            mv Devops-Project/terraform ${TERRAFORM_DIR} // Move terraform directory to expected location
+                            mv Devops-Project/terraform ${TERRAFORM_DIR} # Move terraform directory to expected location
                         else
                             echo "Terraform directory not found in the repository."
-                            exit 1 // Exit the script with an error
+                            exit 1 # Exit the script with an error
                         fi
                     '''
                 }
