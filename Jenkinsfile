@@ -36,10 +36,11 @@ pipeline {
 
         stage('Docker Push') {
             steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', "${REGISTRY_CREDENTIALS}") {
-                        docker.image("${DOCKER_IMAGE}").push()
-                    }
+                withCredentials([usernamePassword(credentialsId: REGISTRY_CREDENTIALS, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh '''
+                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                        docker push ${DOCKER_IMAGE}
+                    '''
                 }
             }
         }
