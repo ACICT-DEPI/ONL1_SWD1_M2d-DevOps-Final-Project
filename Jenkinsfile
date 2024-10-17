@@ -71,10 +71,10 @@ pipeline {
                 // Clone the GitHub repository containing Terraform files
                 sh '''
                     if [ -d "${TERRAFORM_DIR}" ]; then
-                        rm -rf ${TERRAFORM_DIR}
+                        rm -rf ${TERRAFORM_DIR}  # Clean up existing directory
                     fi
                     git clone ${GIT_REPO}
-                    mv Devops-Project/terraform ${TERRAFORM_DIR} // Move terraform directory to expected location
+                    mv Devops-Project/terraform ${TERRAFORM_DIR} # Move terraform directory to expected location
                 '''
             }
         }
@@ -105,4 +105,9 @@ pipeline {
         }
         failure {
             // Send failure email notification
-            mail to: 'abdelrahman.naser958@gmail.com, mohamed.271
+            mail to: 'abdelrahman.naser958@gmail.com, mohamed.2714104@gmail.com',
+                subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+                body: "Something is wrong with ${env.BUILD_URL}"
+        }
+    }
+}
