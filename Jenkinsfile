@@ -6,8 +6,7 @@ pipeline {
         LATEST_IMAGE = "mohamedesmael/devops_final_project:latest"
         REGISTRY_CREDENTIALS = 'dockerhub-credentials-id' // Docker Hub credentials ID
         AWS_CREDENTIALS = 'aws-credentials-id' // AWS credentials ID from Jenkins
-        TERRAFORM_DIR = '/project/terraform' // Updated local directory for Terraform files
-        GIT_REPO = 'https://github.com/AyaOmer/Devops-Project.git' // GitHub repository URL
+        TERRAFORM_DIR = '/project/terraform/Devops-Project/terraform' // Updated local directory for Terraform files
     }
 
     stages {
@@ -66,38 +65,9 @@ pipeline {
             }
         }
 
-        stage('Clone or Update Terraform Directory from GitHub') {
-            steps {
-                script {
-                    // Clone or pull the GitHub repository containing Terraform files
-                    sh '''
-                        if [ -d "Devops-Project" ]; then
-                            echo "Directory Devops-Project exists. Checking out master branch and pulling the latest changes."
-                            cd Devops-Project
-                            git checkout master || git checkout -b master
-                            git pull origin master
-                        else
-                            echo "Cloning the repository."
-                            git clone ${GIT_REPO}
-                        fi
-
-                        # Ensure the Terraform directory exists before moving
-                        if [ -d "Devops-Project/terraform" ]; then
-                            mv Devops-Project/terraform ${TERRAFORM_DIR} # Move terraform directory to expected location
-                        else
-                            echo "Terraform directory not found in the repository."
-                            echo "Current directory contents:"
-                            ls -la Devops-Project # List contents of the Devops-Project directory
-                            exit 1 # Exit the script with an error
-                        fi
-                    '''
-                }
-            }
-        }
-
         stage('Run Terraform') {
             steps {
-                // Run Terraform commands in the specified directory
+                // Run Terraform commands in the specified local directory
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS, accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
                     dir(TERRAFORM_DIR) {
                         sh '''
