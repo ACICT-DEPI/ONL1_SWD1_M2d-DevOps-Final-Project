@@ -66,21 +66,24 @@ pipeline {
             }
         }
 
-        stage('Clone Terraform Directory from GitHub') {
+        stage('Clone or Update Terraform Directory from GitHub') {
             steps {
-                // Clone or pull the GitHub repository containing Terraform files
-                sh '''
-                    if [ -d "Devops-Project" ]; then
-                        echo "Directory Devops-Project exists. Pulling the latest changes."
-                        cd Devops-Project
-                        git pull
-                    else
-                        echo "Cloning the repository."
-                        git clone ${GIT_REPO}
-                    fi
+                script {
+                    // Clone or pull the GitHub repository containing Terraform files
+                    sh '''
+                        if [ -d "Devops-Project" ]; then
+                            echo "Directory Devops-Project exists. Checking out master branch and pulling the latest changes."
+                            cd Devops-Project
+                            git checkout master || git checkout -b master
+                            git pull origin master
+                        else
+                            echo "Cloning the repository."
+                            git clone ${GIT_REPO}
+                        fi
 
-                    mv Devops-Project/terraform ${TERRAFORM_DIR} // Move terraform directory to expected location
-                '''
+                        mv Devops-Project/terraform ${TERRAFORM_DIR} // Move terraform directory to expected location
+                    '''
+                }
             }
         }
 
