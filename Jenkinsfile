@@ -68,13 +68,18 @@ pipeline {
 
         stage('Clone Terraform Directory from GitHub') {
             steps {
-                // Clone the GitHub repository containing Terraform files
+                // Clone or pull the GitHub repository containing Terraform files
                 sh '''
-                    if [ -d "${TERRAFORM_DIR}" ]; then
-                        rm -rf ${TERRAFORM_DIR}  # Clean up existing directory
+                    if [ -d "Devops-Project" ]; then
+                        echo "Directory Devops-Project exists. Pulling the latest changes."
+                        cd Devops-Project
+                        git pull
+                    else
+                        echo "Cloning the repository."
+                        git clone ${GIT_REPO}
                     fi
-                    git clone ${GIT_REPO}
-                    mv Devops-Project/terraform ${TERRAFORM_DIR} # Move terraform directory to expected location
+
+                    mv Devops-Project/terraform ${TERRAFORM_DIR} // Move terraform directory to expected location
                 '''
             }
         }
