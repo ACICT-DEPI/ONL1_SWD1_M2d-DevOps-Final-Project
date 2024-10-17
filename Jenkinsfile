@@ -7,7 +7,6 @@ pipeline {
         REGISTRY_CREDENTIALS = 'dockerhub-credentials-id' // Docker Hub credentials ID
         AWS_CREDENTIALS = 'aws-credentials-id' // AWS credentials ID from Jenkins
         TERRAFORM_DIR = '/project/terraform/Devops-Project/terraform' // Updated local directory for Terraform files
-        SUDO_PASS = '123456789' // Sudo password
     }
 
     stages {
@@ -28,18 +27,6 @@ pipeline {
                     } else {
                         echo "No container found using port 3000"
                     }
-                }
-            }
-        }
-
-        stage('Set Permissions') {
-            steps {
-                script {
-                    // Use sudo to change permissions with password
-                    sh '''
-                        echo ${SUDO_PASS} | sudo -S chown -R jenkins:jenkins /project
-                        echo ${SUDO_PASS} | sudo -S chmod -R 775 /project
-                    '''
                 }
             }
         }
