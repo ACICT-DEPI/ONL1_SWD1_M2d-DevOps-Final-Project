@@ -74,42 +74,43 @@ pipeline {
                             export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
                             export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
                             terraform init
-                            terraform apply -auto-approve
+                            terraform destory
+                            // terraform apply -auto-approve
                         '''
                     }
                 }
             }
         }
-          stage('Ansible Code') {
-            steps {
-                script {
-                    def ec2_ip = sh(script: "terraform output -raw ec2_public_ip", returnStdout: true).trim()
-                    if (ec2_ip) {
-                        writeFile file: 'inventory', text: "[web]\n${ec2_ip}"
-                        echo "Inventory file content:\n"
-                        sh 'cat inventory'
-                        sh 'ansible-playbook -i inventory nginx.yml'
-                    } else {
-                        error "Failed to retrieve EC2 public IP"
-                    }
-                }
-            }
-        }
+    //       stage('Ansible Code') {
+    //         steps {
+    //             script {
+    //                 def ec2_ip = sh(script: "terraform output -raw ec2_public_ip", returnStdout: true).trim()
+    //                 if (ec2_ip) {
+    //                     writeFile file: 'inventory', text: "[web]\n${ec2_ip}"
+    //                     echo "Inventory file content:\n"
+    //                     sh 'cat inventory'
+    //                     sh 'ansible-playbook -i inventory nginx.yml'
+    //                 } else {
+    //                     error "Failed to retrieve EC2 public IP"
+    //                 }
+    //             }
+    //         }
+    //     }
     }
     
 
-    post {
-        success {
-            // Send success email notification
-            mail to: 'abdelrahman.naser958@gmail.com, mohamed.2714104@gmail.com',
-                subject: "Successful Pipeline: ${currentBuild.fullDisplayName}",
-                body: "The build succeeded: ${env.BUILD_URL}"
-        }
-        failure {
-            // Send failure email notification
-            mail to: 'abdelrahman.naser958@gmail.com, mohamed.2714104@gmail.com',
-                subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
-                body: "Something is wrong with ${env.BUILD_URL}"
-        }
-    }
+    // post {
+    //     success {
+    //         // Send success email notification
+    //         mail to: 'abdelrahman.naser958@gmail.com, mohamed.2714104@gmail.com',
+    //             subject: "Successful Pipeline: ${currentBuild.fullDisplayName}",
+    //             body: "The build succeeded: ${env.BUILD_URL}"
+    //     }
+    //     failure {
+    //         // Send failure email notification
+    //         mail to: 'abdelrahman.naser958@gmail.com, mohamed.2714104@gmail.com',
+    //             subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+    //             body: "Something is wrong with ${env.BUILD_URL}"
+    //     }
+    // }
 }
