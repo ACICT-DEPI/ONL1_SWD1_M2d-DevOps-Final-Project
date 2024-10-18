@@ -63,24 +63,23 @@ pipeline {
             }
         }
     }
+  
     post {
-        always {
+     always {
             // Clean up inventory file
             sh 'rm -f ansible/inventory'
         }
+        // success {
+        //     // Send success email notification
+        //     mail to: 'abdelrahman.naser958@gmail.com, mohamed.2714104@gmail.com',
+        //         subject: "Successful Pipeline: ${currentBuild.fullDisplayName}",
+        //         body: "The build succeeded: ${env.BUILD_URL}"
+        // }
+        // failure {
+        //     // Send failure email notification
+        //     mail to: 'abdelrahman.naser958@gmail.com, mohamed.2714104@gmail.com',
+        //         subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+        //         body: "Something is wrong with ${env.BUILD_URL}"
+        // }
     }
-    // post {
-    //     success {
-    //         // Send success email notification
-    //         mail to: 'abdelrahman.naser958@gmail.com, mohamed.2714104@gmail.com',
-    //             subject: "Successful Pipeline: ${currentBuild.fullDisplayName}",
-    //             body: "The build succeeded: ${env.BUILD_URL}"
-    //     }
-    //     failure {
-    //         // Send failure email notification
-    //         mail to: 'abdelrahman.naser958@gmail.com, mohamed.2714104@gmail.com',
-    //             subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
-    //             body: "Something is wrong with ${env.BUILD_URL}"
-    //     }
-    // }
 }

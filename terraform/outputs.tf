@@ -28,3 +28,6 @@ output "bastion_public_ip_2" {
 
 }
 
+output "public_lb_dns" {
+  value = module.load_balancer.dns_name
+}

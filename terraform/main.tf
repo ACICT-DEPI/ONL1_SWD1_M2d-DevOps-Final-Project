@@ -26,26 +26,6 @@ module "public_subnet_2" {
   depends_on            = [module.vpc]
 }
 
-# Private Subnets
-# module "private_subnet_1" {
-#   source                = "./modules/subnet"
-#   vpc_id                = module.vpc.vpc_id
-#   subnet_cidr           = "10.0.2.0/24"
-#   availability_zone     = "us-east-1a"
-#   map_public_ip_on_launch = false
-#   subnet_name           = "private-subnet-1"
-#   depends_on            = [module.vpc]
-# # }
-
-# module "private_subnet_2" {
-#   source                = "./modules/subnet"
-#   vpc_id                = module.vpc.vpc_id
-#   subnet_cidr           = "10.0.4.0/24"
-#   availability_zone     = "us-east-1b"
-#   map_public_ip_on_launch = false
-#   subnet_name           = "private-subnet-2"
-#   depends_on            = [module.vpc]
-# }
 
 # Internet Gateway
 module "internet_gateway" {
@@ -65,23 +45,7 @@ module "public_route_table" {
   depends_on          = [module.vpc, module.internet_gateway, module.public_subnet_1]
 }
 
-# # NAT Gateway
-# module "nat_gateway" {
-#   source            = "./modules/nat_gateway"
-#   public_subnet_id  = module.public_subnet_1.subnet_id
-#   name              = "${var.project_name}-nat-gw"
-#   depends_on        = [module.public_subnet_1, module.internet_gateway , module.public_subnet_2]
-# }
 
-# # Private Route Table
-# module "private_route_table" {
-#   source           = "./modules/private_route_table"
-#   vpc_id           = module.vpc.vpc_id
-#   subnet_ids       = [module.private_subnet_1.subnet_id, module.private_subnet_2.subnet_id]
-#   nat_gateway_id   = module.nat_gateway.nat_gw_id
-#   name             = "${var.project_name}-private-rt"
-#   depends_on       = [module.vpc, module.private_subnet_1, module.private_subnet_2, module.nat_gateway]
-# }
 
 # Security Groups
 module "bastion_security_group" {
@@ -130,7 +94,6 @@ module "public_instances" {
 }
 
 
-
 module "load_balancer" {
   source                = "./modules/load_balancer"
   lb_name               = "my-load-balancer"
@@ -142,12 +105,12 @@ module "load_balancer" {
     module.bastion_security_group.security_group_id
   ]
   target_group_name     = "my-target-group"
-  # target_group_port     = 3000  # Updated port to 3000 to match Docker configuration
-  target_group_port     = 80  # Updated port to 3000 to match Docker configuration
+  target_group_port     = 3000  # Updated port to 3000 to match Docker configuration
+  
   target_group_protocol = "HTTP"
   vpc_id                = module.vpc.vpc_id
-  # listener_port         = 3000  # Updated port to 3000 for the load balancer listener
-  listener_port         = 80  # Updated port to 3000 for the load balancer listener
+  listener_port         = 3000  # Updated port to 3000 for the load balancer listener
+  
   listener_protocol     = "HTTP"
   instance_count        = 2
   instance_ids          = module.public_instances.instance_ids
