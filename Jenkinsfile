@@ -1,50 +1,26 @@
 pipeline {
     agent any
-
     environment {
         DOCKER_IMAGE = "mohamedesmael/devops_final_project:${env.BUILD_NUMBER}"
         LATEST_IMAGE = "mohamedesmael/devops_final_project:latest"
         REGISTRY_CREDENTIALS = 'dockerhub-credentials-id'
-        AWS_CREDENTIALS = 'aws-credentials-id' 
+        AWS_CREDENTIALS = 'aws-credentials-id'
         TERRAFORM_DIR = 'terraform'
+        ANSIBLE_DIR = 'ansible'
     }
-
     stages {
-        stage('Check and Free Port 3000') {
-            steps {
-                script {
-                    // Check if any container is using port 3000
-                    def containerID = sh(
-                        script: "docker ps --filter 'publish=3000' --format '{{.ID}}'",
-                        returnStdout: true
-                    ).trim()
-
-                    // If a container is found, stop and remove it
-                    if (containerID) {
-                        echo "Stopping container with ID ${containerID} using port 3000"
-                        sh "docker stop ${containerID}"
-                        sh "docker rm ${containerID}"
-                    } else {
-                        echo "No container found using port 3000"
-                    }
-                }
-            }
-        }
-
         // stage('Docker Build') {
         //     steps {
         //         // Build the Docker image
         //         sh "docker build Docker/. -t ${DOCKER_IMAGE}"
         //     }
         // }
-
         // stage('Docker Tag as Latest') {
         //     steps {
         //         // Tag the image as latest
         //         sh "docker tag ${DOCKER_IMAGE} ${LATEST_IMAGE}"
         //     }
         // }
-
         // stage('Docker Push') {
         //     steps {
         //         // Push the images to Docker Hub
@@ -57,48 +33,42 @@ pipeline {
         //         }
         //     }
         // }
-
-        // stage('Docker Deploy') {
-        //     steps {
-        //         // Deploy the Docker container
-        //         sh "docker run -d -p 3000:80 ${LATEST_IMAGE}"
-        //     }
-        // }
-
         stage('Run Terraform') {
             steps {
-                
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS, accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
                     dir(TERRAFORM_DIR) {
                         sh '''
                             export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
                             export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
                             terraform init
-                            terraform destroy -auto-approve
-                            // terraform apply -auto-approve
+                           # terraform destroy -auto-approve
+                            terraform apply -auto-approve
+                            chmod +x inventory.sh
+                            ./inventory.sh
                         '''
                     }
                 }
             }
         }
-    //       stage('Ansible Code') {
-    //         steps {
-    //             script {
-    //                 def ec2_ip = sh(script: "terraform output -raw ec2_public_ip", returnStdout: true).trim()
-    //                 if (ec2_ip) {
-    //                     writeFile file: 'inventory', text: "[web]\n${ec2_ip}"
-    //                     echo "Inventory file content:\n"
-    //                     sh 'cat inventory'
-    //                     sh 'ansible-playbook -i inventory nginx.yml'
-    //                 } else {
-    //                     error "Failed to retrieve EC2 public IP"
-    //                 }
-    //             }
-    //         }
-    //     }
+        stage('Run Ansible') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS, accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                    dir(ANSIBLE_DIR) {
+                        sh '''
+                            cat inventory
+                            ansible-playbook -i inventory react.yaml
+                        '''
+                    }
+                }
+            }
+        }
     }
-    
-
+    post {
+        always {
+            // Clean up inventory file
+            sh 'rm -f ansible/inventory'
+        }
+    }
     // post {
     //     success {
     //         // Send success email notification
