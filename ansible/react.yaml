@@ -1,62 +1,57 @@
 ---
-- name: Install Docker, Docker Compose, and run the Docker image
-  hosts: localhost
+- name: Setup Docker and run container
+  hosts: all
   become: true
+
   tasks:
     - name: Update apt cache
       ansible.builtin.apt:
-        update_cache: true
+         update_cache: yes
 
     - name: Install prerequisites
-      ansible.builtin.apt:
+      apt:
         name:
           - apt-transport-https
           - ca-certificates
           - curl
           - software-properties-common
+          - python3-pip  # Ensure pip is installed
         state: present
+        update_cache: yes
 
     - name: Add Docker GPG key
-      ansible.builtin.apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
+      shell: |
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 
     - name: Add Docker repository
-      ansible.builtin.apt_repository:
-        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
         state: present
-
-    - name: Update apt cache again after adding Docker repository
-      ansible.builtin.apt:
-        update_cache: true
 
     - name: Install Docker
-      ansible.builtin.apt:
+      apt:
         name: docker-ce
         state: present
+        update_cache: yes
 
-    - name: Install Docker Compose
-      ansible.builtin.apt:
-        name: docker-compose
-        state: present
-
-    - name: Ensure Docker is running
-      ansible.builtin.service:
+    - name: Ensure Docker service is running
+      systemd:
         name: docker
         state: started
-        enabled: true
+        enabled: yes
 
+        
     - name: Add user to Docker group
       ansible.builtin.user:
         name: "{{ ansible_user }}"
         groups: docker
         append: true
-
+        
     - name: Restart Docker service
       ansible.builtin.service:
         name: docker
-        state: restarted
-
+        state: restarted        
+        
     - name: Pull the latest version of the Docker image
       ansible.builtin.command: docker pull mohamedesmael/devops_final_project:latest
       changed_when: false  # This task doesn't modify the state if the image is already up to date
@@ -65,7 +60,6 @@
       ansible.builtin.command: docker ps -q -f name=devops_final_project
       register: container_check
       changed_when: false  # Only checking, so no change reported
-
     - name: Stop the existing Docker container if it is running
       ansible.builtin.command: docker stop devops_final_project
       when: container_check.stdout != ""
@@ -79,4 +73,6 @@
     - name: Run the latest version of the Docker image
       ansible.builtin.command: docker run -d --name devops_final_project -p 3000:80 mohamedesmael/devops_final_project:latest
       when: container_check.stdout == ""  # Only run if the container is not already running
-      changed_when: true  # This task changes the state by running the container
+      changed_when: true  # This task changes the state by running the container      
+      
+      

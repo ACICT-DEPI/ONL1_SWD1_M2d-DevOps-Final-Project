@@ -18,7 +18,13 @@
 #   value       = module.nat_gateway.nat_gw_id
 # }
 
-output "bastion_public_ip" {
+output "bastion_public_ip_1" {
   value = module.public_instances.public_ips[0]  # Accessing the first (and only) public IP
+
+}
+
+output "bastion_public_ip_2" {
+  value = module.public_instances.public_ips[1]  # Accessing the first (and only) public IP
+
 }
 

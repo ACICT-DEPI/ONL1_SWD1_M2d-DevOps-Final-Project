@@ -33,7 +33,16 @@ variable "key_name" {
 variable "user_data" {
   description = "User data to initialize the EC2 instances"
   type        = string
-  default     = ""  # Default to empty user data
+  default     = <<-EOF
+                #!/bin/bash
+                sudo apt update -y
+                sudo apt install -y nginx
+                sudo systemctl enable --now nginx
+               
+                sudo systemctl restart nginx
+                # Create a sample index.html file
+                echo "Terraform project From Private ec2<br><br>created By: Aya Omar<br><br>The HostName: $(hostname) " | sudo tee /var/www/html/index.html
+                EOF
 }
 
 variable "instance_name" {
