@@ -4,9 +4,9 @@ pipeline {
     environment {
         DOCKER_IMAGE = "mohamedesmael/devops_final_project:${env.BUILD_NUMBER}"
         LATEST_IMAGE = "mohamedesmael/devops_final_project:latest"
-        REGISTRY_CREDENTIALS = 'dockerhub-credentials-id' // Docker Hub credentials ID
-        AWS_CREDENTIALS = 'aws-credentials-id' // AWS credentials ID from Jenkins
-        TERRAFORM_DIR = '/project/terraform/Devops-Project/terraform' // Updated local directory for Terraform files
+        REGISTRY_CREDENTIALS = 'dockerhub-credentials-id'
+        AWS_CREDENTIALS = 'aws-credentials-id' 
+        TERRAFORM_DIR = 'terraform'
     }
 
     stages {
@@ -31,43 +31,43 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
-            steps {
-                // Build the Docker image
-                sh "docker build Docker/. -t ${DOCKER_IMAGE}"
-            }
-        }
+        // stage('Docker Build') {
+        //     steps {
+        //         // Build the Docker image
+        //         sh "docker build Docker/. -t ${DOCKER_IMAGE}"
+        //     }
+        // }
 
-        stage('Docker Tag as Latest') {
-            steps {
-                // Tag the image as latest
-                sh "docker tag ${DOCKER_IMAGE} ${LATEST_IMAGE}"
-            }
-        }
+        // stage('Docker Tag as Latest') {
+        //     steps {
+        //         // Tag the image as latest
+        //         sh "docker tag ${DOCKER_IMAGE} ${LATEST_IMAGE}"
+        //     }
+        // }
 
-        stage('Docker Push') {
-            steps {
-                // Push the images to Docker Hub
-                withCredentials([usernamePassword(credentialsId: REGISTRY_CREDENTIALS, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh '''
-                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-                        docker push ${DOCKER_IMAGE}
-                        docker push ${LATEST_IMAGE}
-                    '''
-                }
-            }
-        }
+        // stage('Docker Push') {
+        //     steps {
+        //         // Push the images to Docker Hub
+        //         withCredentials([usernamePassword(credentialsId: REGISTRY_CREDENTIALS, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+        //             sh '''
+        //                 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        //                 docker push ${DOCKER_IMAGE}
+        //                 docker push ${LATEST_IMAGE}
+        //             '''
+        //         }
+        //     }
+        // }
 
-        stage('Docker Deploy') {
-            steps {
-                // Deploy the Docker container
-                sh "docker run -d -p 3000:80 ${LATEST_IMAGE}"
-            }
-        }
+        // stage('Docker Deploy') {
+        //     steps {
+        //         // Deploy the Docker container
+        //         sh "docker run -d -p 3000:80 ${LATEST_IMAGE}"
+        //     }
+        // }
 
         stage('Run Terraform') {
             steps {
-                // Run Terraform commands in the specified local directory
+                
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS, accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
                     dir(TERRAFORM_DIR) {
                         sh '''
