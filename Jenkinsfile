@@ -80,7 +80,23 @@ pipeline {
                 }
             }
         }
+          stage('Ansible Code') {
+            steps {
+                script {
+                    def ec2_ip = sh(script: "terraform output -raw ec2_public_ip", returnStdout: true).trim()
+                    if (ec2_ip) {
+                        writeFile file: 'inventory', text: "[web]\n${ec2_ip}"
+                        echo "Inventory file content:\n"
+                        sh 'cat inventory'
+                        sh 'ansible-playbook -i inventory nginx.yml'
+                    } else {
+                        error "Failed to retrieve EC2 public IP"
+                    }
+                }
+            }
+        }
     }
+    
 
     post {
         success {
